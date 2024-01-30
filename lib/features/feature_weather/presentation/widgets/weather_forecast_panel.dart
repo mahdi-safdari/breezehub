@@ -1,0 +1,200 @@
+import 'dart:ui';
+
+import 'package:breezehub/core/assets.dart';
+import 'package:breezehub/core/utils/date_converter.dart';
+import 'package:breezehub/core/widgets/get_weather_icon.dart';
+import 'package:breezehub/features/feature_weather/data/models/weather_information_model.dart';
+import 'package:breezehub/features/feature_weather/domain/entities/weather_information_entity.dart';
+import 'package:breezehub/features/feature_weather/presentation/bloc/cubit/change_stack_cubit.dart';
+import 'package:breezehub/features/feature_weather/presentation/bloc/home_bloc.dart';
+import 'package:breezehub/features/feature_weather/presentation/bloc/weather_information_status.dart';
+import 'package:breezehub/features/feature_weather/presentation/widgets/hourly_forecast_list.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+class ForecastWeather extends StatefulWidget {
+  final Size size;
+
+  const ForecastWeather({super.key, required this.size});
+
+  @override
+  State<ForecastWeather> createState() => _ForecastWeatherState();
+}
+
+class _ForecastWeatherState extends State<ForecastWeather> {
+  @override
+  void initState() {
+    super.initState();
+    BlocProvider.of<HomeBloc>(context).add(ForecastDaysEvent('Sast'));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(44)),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
+        child: Container(
+          height: 335,
+          width: widget.size.width,
+          decoration: BoxDecoration(
+            color: const Color(0xff2E335A).withOpacity(0.26),
+            border: Border.symmetric(
+              horizontal: BorderSide(color: Colors.white.withOpacity(0.2), width: 2.5),
+            ),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(45)),
+          ),
+          child: Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.topCenter,
+            children: [
+              // Ellipse 1
+              Positioned(top: 0, right: 0, child: Image.asset(Assets.ellipse1)),
+              // Ellipse 2
+              Positioned(top: 0, child: Image.asset(Assets.ellipse2)),
+              // Ellipse 3
+              Positioned(top: 0, child: Image.asset(Assets.ellipse3)),
+              Column(
+                children: [
+                  Container(
+                    height: 5,
+                    width: 48,
+                    margin: const EdgeInsets.only(top: 16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xff000000).withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+
+                  // Hourly Forecast & Weekly Forecast
+                  Padding(
+                    padding: const EdgeInsets.only(top: 16, right: 30, left: 30),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            BlocProvider.of<ChangeStackCubit>(context).changeStackIndexHourly();
+                          },
+                          child: Text(
+                            'Hourly Forecast',
+                            style: TextStyle(
+                              fontSize: 15,
+                              color: const Color(0xffEBEBF5).withOpacity(0.6),
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            BlocProvider.of<ChangeStackCubit>(context).changeStackIndexDaily();
+                          },
+                          child: Text(
+                            'Daily Forecast',
+                            style: TextStyle(
+                              fontSize: 15,
+                              color: const Color(0xffEBEBF5).withOpacity(0.6),
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Divider
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Divider(color: Colors.white.withOpacity(0.2), height: 10),
+                      BlocBuilder<ChangeStackCubit, int>(
+                        builder: (context, state) {
+                          return RotatedBox(
+                            quarterTurns: state == 0 ? 0 : 2,
+                            child: Image.asset(
+                              Assets.underline,
+                              color: const Color(0xffDA99DD),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                  // ListView
+                  Padding(
+                    padding: const EdgeInsets.only(top: 16),
+                    child: SizedBox(
+                      height: 146,
+                      width: widget.size.width,
+                      child: BlocBuilder<HomeBloc, HomeState>(
+                        buildWhen: (previous, current) {
+                          if (previous.informationStatus != current.informationStatus) {
+                            return true;
+                          } else {
+                            return false;
+                          }
+                        },
+                        builder: (context, state) {
+                          if (state.informationStatus is WeatherInformationLoading) {
+                            return const Center(child: CupertinoActivityIndicator(color: Colors.white));
+                          }
+                          if (state.informationStatus is WeatherInformationCompleted) {
+                            final WeatherInformationCompleted informationCompleted = state.informationStatus as WeatherInformationCompleted;
+                            final WeatherInformationEntity informationEntity = informationCompleted.informationEntity;
+                            return BlocBuilder<ChangeStackCubit, int>(
+                              builder: (BuildContext context, int state) {
+                                return IndexedStack(
+                                  index: state,
+                                  children: [
+                                    ListView.builder(
+                                        padding: const EdgeInsets.only(left: 20),
+                                        scrollDirection: Axis.horizontal,
+                                        physics: const BouncingScrollPhysics(),
+                                        itemCount: informationEntity.hourly!.length,
+                                        clipBehavior: Clip.none,
+                                        itemBuilder: (BuildContext context, int index) {
+                                          final Hourly hourly = informationEntity.hourly![index];
+                                          return HourlyForecastList(
+                                            temp: hourly.temp!.round().toString(),
+                                            pop: hourly.pop!,
+                                            daily: DateConverter.changeDtToDateTime(hourly.dt),
+                                            icon: GetWeatherIcon.setIconForMain(hourly.weather![0].description!),
+                                            hourly: DateConverter.changeDtToDateTimeHour(hourly.dt, informationEntity.timezoneOffset),
+                                          );
+                                        }),
+                                    ListView.builder(
+                                        padding: const EdgeInsets.only(left: 20),
+                                        scrollDirection: Axis.horizontal,
+                                        physics: const BouncingScrollPhysics(),
+                                        itemCount: informationEntity.daily!.length,
+                                        clipBehavior: Clip.none,
+                                        itemBuilder: (BuildContext context, int index) {
+                                          final Daily daily = informationEntity.daily![index];
+                                          return HourlyForecastList(
+                                            // hourly: DateConverter.changeDtToDateTimeHour(daily.dt, informationEntity.timezoneOffset),
+                                            daily: DateConverter.changeDtToDateTime(daily.dt),
+                                            icon: GetWeatherIcon.setIconForMain(daily.weather![0].description!),
+                                            pop: daily.pop!,
+                                            temp: daily.temp!.max!.round().toString(),
+                                            tempMin: daily.temp!.min!.round().toString(),
+                                          );
+                                        }),
+                                  ],
+                                );
+                              },
+                            );
+                          }
+                          return Container();
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
