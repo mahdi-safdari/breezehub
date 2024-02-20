@@ -1,6 +1,29 @@
 part of 'favorite_bloc.dart';
 
-@immutable
-abstract class FavoriteState {}
+class FavoriteState {
+  final SaveCityStatus saveCityStatus;
+  final GetAllCityStatus getAllCityStatus;
+  final GetCityStatus getCityStatus;
+  final DeleteCityStatus deleteCityStatus;
 
-class FavoriteInitial extends FavoriteState {}
+  FavoriteState({
+    required this.saveCityStatus,
+    required this.getAllCityStatus,
+    required this.getCityStatus,
+    required this.deleteCityStatus,
+  });
+
+  FavoriteState copyWith({
+    SaveCityStatus? saveCityStatus,
+    GetAllCityStatus? getAllCityStatus,
+    GetCityStatus? getCityStatus,
+    DeleteCityStatus? deleteCityStatus,
+  }) {
+    return FavoriteState(
+      saveCityStatus: saveCityStatus ?? this.saveCityStatus,
+      getAllCityStatus: getAllCityStatus ?? this.getAllCityStatus,
+      getCityStatus: getCityStatus ?? this.getCityStatus,
+      deleteCityStatus: deleteCityStatus ?? this.deleteCityStatus,
+    );
+  }
+}
