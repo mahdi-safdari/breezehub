@@ -3,10 +3,10 @@ import 'package:breezehub/core/usecases/use_case.dart';
 import 'package:breezehub/features/feature_weather/domain/entities/forecast_days_entity.dart';
 import 'package:breezehub/features/feature_weather/domain/repositories/weather_repository.dart';
 
-class ForecastDaysUseCase extends UseCase<DataState<ForecastDaysEntity>, String> {
+class GetForecastDaysUseCase extends UseCase<DataState<ForecastDaysEntity>, String> {
   final WeatherRepository weatherRepository;
 
-  ForecastDaysUseCase(this.weatherRepository);
+  GetForecastDaysUseCase(this.weatherRepository);
 
   @override
   Future<DataState<ForecastDaysEntity>> call(String param) {
