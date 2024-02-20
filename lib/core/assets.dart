@@ -21,4 +21,6 @@ class Assets {
   static const String uvIndex = 'assets/images/uv-index.png';
   static const String wind = 'assets/images/wind.svg';
   static const String currentLocation = 'assets/images/undraw_my_current_location_re_whmt.svg';
+  static const String noData = 'assets/images/undraw_no_data_re_kwbl.svg';
+  static const String welcome = 'assets/images/undraw_welcome_cats_thqn.svg';
 }
