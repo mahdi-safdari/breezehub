@@ -1,27 +1,19 @@
-class WeatherInformation {
-  num? lat;
-  num? lon;
-  String? timezone;
-  num? timezoneOffset;
-  Current? current;
-  List<Minutely>? minutely;
-  List<Hourly>? hourly;
-  List<Daily>? daily;
-  List<Alerts>? alerts;
+import 'package:breezehub/features/feature_weather/domain/entities/weather_information_entity.dart';
 
-  WeatherInformation({
-    this.lat,
-    this.lon,
-    this.timezone,
-    this.timezoneOffset,
-    this.current,
-    this.minutely,
-    this.hourly,
-    this.daily,
-    this.alerts,
+class WeatherInformationModel extends WeatherInformationEntity {
+  const WeatherInformationModel({
+    super.lat,
+    super.lon,
+    super.timezone,
+    super.timezoneOffset,
+    super.current,
+    super.minutely,
+    super.hourly,
+    super.daily,
+    super.alerts,
   });
 
-  factory WeatherInformation.fromJson(Map<String, dynamic> json) {
+  factory WeatherInformationModel.fromJson(Map<String, dynamic> json) {
     List<Minutely> minutely = [];
     if (json['minutely'] != null) {
       json['minutely'].forEach((v) {
@@ -50,7 +42,7 @@ class WeatherInformation {
       });
     }
 
-    return WeatherInformation(
+    return WeatherInformationModel(
       lat: json['lat'],
       lon: json['lon'],
       timezone: json['timezone'],
