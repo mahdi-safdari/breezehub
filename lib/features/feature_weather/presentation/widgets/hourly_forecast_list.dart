@@ -1,95 +1,73 @@
-import 'package:breezehub/core/assets.dart';
+import 'package:breezehub/core/utils/constants.dart';
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 
 class HourlyForecastList extends StatelessWidget {
+  final String hourly;
+  final String daily;
+  final String temp;
+  final String? tempMin;
+  final num pop;
+  final Widget icon;
+
   const HourlyForecastList({
     super.key,
+    required this.hourly,
+    required this.daily,
+    required this.temp,
+    this.tempMin,
+    required this.pop,
+    required this.icon,
   });
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      padding: const EdgeInsets.only(left: 20),
-      scrollDirection: Axis.horizontal,
-      physics: const BouncingScrollPhysics(),
-      itemCount: 10,
-      clipBehavior: Clip.none,
-      itemBuilder: (BuildContext context, int index) {
-        return Container(
-          width: 60,
-          height: 146,
-          margin: const EdgeInsets.only(right: 16),
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-          decoration: ShapeDecoration(
-            color: const Color(0x3348319D),
-            shape: RoundedRectangleBorder(
-              side: BorderSide(
-                width: 1,
-                color: Colors.white.withOpacity(0.2),
-              ),
-              borderRadius: BorderRadius.circular(30),
-            ),
-            shadows: const [
-              BoxShadow(color: Color(0x3F000000), blurRadius: 10, offset: Offset(5, 4), spreadRadius: 0),
-            ],
-          ),
-          child: Column(
+    final ThemeData theme = Theme.of(context);
+    return Container(
+      width: 70,
+      height: 146,
+      margin: const EdgeInsets.only(right: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      decoration: ShapeDecoration(
+        shape: RoundedRectangleBorder(side: BorderSide(width: 1, color: Constants.quaternary), borderRadius: BorderRadius.circular(30)),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          // Hourly
+          Text(hourly, style: theme.textTheme.labelMedium),
+          // Daily
+          Text(daily, style: theme.textTheme.labelLarge),
+          // Icon
+          Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const Text(
-                '12 AM',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  // height: 0.09,
-                  letterSpacing: -0.50,
-                ),
-              ),
-              const SizedBox(height: 16),
-              SizedBox(
-                width: 60,
-                height: 42,
-                child: Stack(
-                  alignment: Alignment.topCenter,
-                  children: [
-                    Positioned(
-                      child: Image.asset(Assets.weatherIcon, width: 45, height: 45),
-                    ),
-                    const Visibility(
-                      visible: false,
-                      child: Positioned(
-                        top: 30,
-                        child: Text(
-                          '30%',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Color(0xFF40CBD8),
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            height: 0.11,
-                            letterSpacing: -0.08,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                '19°',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w400,
-                  // height: 0.06,
-                  letterSpacing: 0.38,
+              SizedBox(width: 32, height: 32, child: icon),
+              Visibility(
+                visible: (pop * 100) > 0,
+                child: Text(
+                  '${(pop * 100).round()}%',
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.labelSmall,
                 ),
               ),
             ],
           ),
-        );
-      },
+          // Temp
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('$temp°', style: theme.textTheme.labelMedium!.copyWith(color: Constants.primary)),
+              const Gap(2),
+              Visibility(
+                visible: tempMin != null,
+                child: Text('$tempMin°', style: theme.textTheme.labelMedium),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
